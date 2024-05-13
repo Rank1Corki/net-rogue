@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZeroElectric.Vinculum;
 
 namespace rogue8
 {
@@ -10,39 +6,40 @@ namespace rogue8
     {
         public int mapWidth;
         public int[] mapTiles;
-        
+
         public int getTile(int x, int y)
         {
             int index = x + y * mapWidth;
             int tileId = mapTiles[index];
             return tileId;
         }
-        public void Draw()
-        {
-            
-            Console.ForegroundColor = ConsoleColor.Gray; // Change to map color
-            int mapHeight = mapTiles.Length / mapWidth; // Calculate the height: the amount of rows
-            for (int y = 0; y < mapHeight; y++) // for each row
-            {
-                for (int x = 0; x < mapWidth; x++) // for each column in the row
-                {
-                    int index = x + y * mapWidth; // Calculate index of tile at (x, y)
-                    int tileId = mapTiles[index]; // Read the tile value at index
 
-                    // Draw the tile graphics
-                    Console.SetCursorPosition(x, y);
-                    switch (tileId)
+        public void Draw(Texture floorTexture, Texture wallTexture, int tileSize)
+        {
+            int mapHeight = mapTiles.Length / mapWidth;
+
+            for (int y = 0; y < mapHeight; y++)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    int index = x + y * mapWidth;
+                    int tileId = mapTiles[index];
+
+                    int posX = (int)(x * tileSize);
+                    int posY = (int)(y * tileSize);
+
+                    // Draw the appropriate texture based on tile ID
+                    if (tileId == 1)
                     {
-                        case 1:
-                            Console.Write("."); // Floor
-                            break;
-                        case 2:
-                            Console.Write("#"); // Wall
-                            break;
-                        default:
-                            Console.Write(" ");
-                            break;
+                        // Draw floor texture
+                        Raylib.DrawTexture(floorTexture, posX, posY, Raylib.WHITE);
                     }
+                    else if (tileId == 2)
+                    {
+                        // Draw wall texture
+                        Raylib.DrawTexture(wallTexture, posX, posY, Raylib.WHITE);
+                    }
+                    // Add more conditions for other tile IDs if needed
                 }
             }
         }

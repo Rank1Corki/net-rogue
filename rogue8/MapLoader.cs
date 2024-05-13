@@ -1,7 +1,8 @@
-﻿using Newtonsoft.Json;
-using System.IO;
+﻿using net_rogue;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace rogue8
 {
     internal class MapLoader
     {
-
+        Game game;
         public Map LoadTestMap()
         {
             Map map = new Map();

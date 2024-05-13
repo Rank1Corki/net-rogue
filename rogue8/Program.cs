@@ -1,27 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using net_rogue;
 
-namespace net_rogue
+class Program
 {
-    internal class Program
+    static void Main(string[] args)
     {
-        public static void Main()
-        {
-            bool again = true;
-            while (again)
-            {
-                Game rogue = new Game();
-                rogue.Run();
+        bool playAgain = true;
+        string mapFilePath = "Maps/mapfile.json"; // Provide the path to the map file
 
-                Console.WriteLine("Play again? Y/N");
-                if (Console.ReadLine() == "N")
-                {
-                    again = false;
-                }
-            }
+        while (playAgain)
+        {
+            Game game = new Game();
+            game.Run(mapFilePath);
+
+            Console.WriteLine("Play again? Y/N");
+            string input = Console.ReadLine();
+            playAgain = (input != null && input.Trim().ToUpper() == "Y");
         }
     }
 }

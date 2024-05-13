@@ -1,20 +1,27 @@
 ﻿using rogue8;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+using System.Numerics;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using ZeroElectric.Vinculum;
 
 namespace net_rogue
 {
     internal class Game
     {
-
+        PlayerCharacter character;
         Map level01;
         Map map;
-        MapLoader loader;
+        public Texture tilemap;
+        public Texture tilemap1;
+        public Texture player1;
+
+        public static readonly int tileSize = 16;
+
+        public void SetImageAndIndex(Texture atlasImage, int imagesPerRow, int index)
+        {
+            // Call the Draw method in the PlayerCharacter class and pass atlasImage, imagesPerRow, and index as arguments
+            character.Draw(atlasImage, imagesPerRow, index);
+        }
         public string AskName()
         {
             while (true)
@@ -45,7 +52,7 @@ namespace net_rogue
 
         public Race AskRace()
         {
-            PlayerCharacter player = new PlayerCharacter('!', ConsoleColor.Red);
+            PlayerCharacter player = new PlayerCharacter('!', Raylib.RED, map);
             Console.WriteLine("Select race for your character");
 
             // Get the names of enums as array
@@ -79,64 +86,70 @@ namespace net_rogue
             return (Race)(raceIndex - 1); // Adjust index to match enum starting from 0
         }
 
-
-        public void Run()
+        public void Init()
         {
-            // Prepare to show game
-            Console.CursorVisible = false;
+            Raylib.InitWindow(480, 270, "Rogue");
+            Raylib.SetTargetFPS(30);
+            tilemap = Raylib.LoadTexture("Tilemaps/Wall.png");
+            tilemap1 = Raylib.LoadTexture("Tilemaps/Floor.png");
+            player1 = Raylib.LoadTexture("Tilemaps/doc_idle_anim_f0.png");
+        }
 
-            // A small window
-            Console.WindowWidth = 60;
-            Console.WindowHeight = 26;
 
-            
-            // Create player
-            PlayerCharacter player = new PlayerCharacter('@', ConsoleColor.Green);
-            player.name = AskName();
-            player.rotu = AskRace();
-            player.position = new Point2D(1, 1);
-
-            // Init and run game loop until ESC iqs pressed
-            Console.Clear();
+        // Add the LoadMap method to load the map
+        private void LoadMap(string mapFilePath)
+        {
             MapLoader loader = new MapLoader();
-            level01 = loader.LoadMapFromFile("Maps/mapfile.json");
-            level01.Draw();
-            player.Draw();
+            map = loader.LoadMapFromFile(mapFilePath);
+        }
 
-            bool game_running = true;
-            while (game_running)
+
+
+
+
+        // Add the Run method to start the game loop
+        public void Run(string mapFilePath)
+        {
+            string playerName = AskName();
+            Race playerRace = AskRace();
+
+            Init(); // Initialize the game window and target FPS
+            LoadMap(mapFilePath); // Load the map from file
+
+
+            // Initialize the player character
+            PlayerCharacter player = new PlayerCharacter('.', Raylib.WHITE, map);
+            player.name = playerName;
+            player.rotu = playerRace;
+            player.position = new Point2D(1, 1);
+            Console.Clear();
+            bool gameRunning = true;
+            while (!Raylib.WindowShouldClose() && gameRunning)
             {
-                ConsoleKeyInfo key = Console.ReadKey();
-                switch (key.Key)
-                {
-                    case ConsoleKey.UpArrow:
-                        player.Move(0, -1, level01);
-                        break;
-                    case ConsoleKey.DownArrow:
-                        player.Move(0, 1, level01);
-                        break;
-                    case ConsoleKey.LeftArrow:
-                        player.Move(-1, 0, level01);
-                        break;
-                    case ConsoleKey.RightArrow:
-                        player.Move(1, 0, level01);
-                        break;
+                // Handle player input and movement
+                if (Raylib.IsKeyDown(KeyboardKey.KEY_UP))
+                    player.Move(0, -1, map);
+                else if (Raylib.IsKeyDown(KeyboardKey.KEY_DOWN))
+                    player.Move(0, 1, map);
+                else if (Raylib.IsKeyDown(KeyboardKey.KEY_LEFT))
+                    player.Move(-1, 0, map);
+                else if (Raylib.IsKeyDown(KeyboardKey.KEY_RIGHT))
+                    player.Move(1, 0, map);
 
-                    case ConsoleKey.Escape:
-                        game_running = false;
-                        break;
+                // Draw the game
+                Raylib.BeginDrawing();
+                Raylib.ClearBackground(Raylib.WHITE);
+                map.Draw(tilemap, tilemap1, tileSize);
+                player.Draw(player1, 5, 5);
+                Raylib.EndDrawing();
 
-                    default:
-                        break;
-                };
-
-
-                Console.Clear();
-                level01.Draw();
-                player.Draw();
+                // Check for game exit
+                if (Raylib.IsKeyPressed(KeyboardKey.KEY_ESCAPE))
+                    gameRunning = false;
             }
 
+            Raylib.CloseWindow();
         }
-    }
 
+    }
 }
